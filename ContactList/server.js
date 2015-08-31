@@ -1,7 +1,12 @@
 var express = require('express');
 var app = express();
+var mongojs = require('mongojs');
+var db = mongojs('contactlist', ['contactlist']);
+var bodyParser = require('body-parser');
 
-app.use(express.static(__dirname+'/public'))
+
+app.use(express.static(__dirname+'/public'));
+app.use(bodyParser.json());
 
 app.get('/',function (req,res){
 	res.send('hello world from server.js');
@@ -9,25 +14,17 @@ app.get('/',function (req,res){
 
 app.get('/contactlist',function (req,res) {
 	console.log("I recieved a get request from contactlist");
-	person1 = {
-		name:'Tim',
-		email:'tim@email.com',
-		number:'1231231232'
-	}
-	person2 = {
-		name:'Tim1',
-		email:'tim1@email.com',
-		number:'1231231231'
-	}
-	person3 = {
-		name:'Tim2',
-		email:'tim2@email.com',
-		number:'1231231230'
-	}
+	db.contactlist.find(function (err, docs) {
+		res.json(docs);
+	});
+	
+});
 
-	var contactlist = [person1, person2, person3];
-	res.json(contactlist);
-})
+app.post('/contactlist', function (req, res) {
+	db.contactlist.insert(req.body,function(err, docs){
+		res.json(docs);
+	});
+});
 
 app.listen(3000);
 console.log('Server runnning on port 3000');
